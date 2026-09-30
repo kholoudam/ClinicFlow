@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import auth from './authRoutes.js';
+import patients from './patientRoutes.js';
+import appointments from './appointmentRoutes.js';
+import dashboard from './dashboardRoutes.js';
+import { authenticate } from '../middlewares/auth.js';
+import { validate,idParam } from '../validators/schemas.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { byPatient } from '../controllers/appointmentController.js';
+const r=Router();
+r.use('/auth',auth);r.use('/patients',patients);r.use('/appointments',appointments);r.use('/dashboard',dashboard);
+r.get('/patients/:id/appointments',authenticate,validate(idParam,'params'),asyncHandler(byPatient));
+export default r;

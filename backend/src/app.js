@@ -1,0 +1,20 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
+import { env } from './config/env.js';
+import routes from './routes/index.js';
+import { openapi } from './routes/swagger.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+
+export const app=express();
+app.use(helmet());app.use(cors({origin:env.CORS_ORIGIN,credentials:false}));app.use(express.json({limit:'1mb'}));
+const loginLimiter=rateLimit({windowMs:15*60*1000,max:20,standardHeaders:true,legacyHeaders:false,message:{error:{code:'RATE_LIMITED',message:'Too many login attempts, please try again later'}}});
+app.get('/health',(req,res)=>res.json({status:'ok'}));
+app.use('/api/auth/login',loginLimiter);
+app.use('/api/docs',swaggerUi.serve,swaggerUi.setup(openapi));
+app.use('/api',routes);
+app.use((req,res)=>res.status(404).json({error:{code:'NOT_FOUND',message:'Route not found'}}));
+app.use(errorHandler);
+if(process.env.NODE_ENV!=='test') app.listen(env.PORT,()=>console.log(`ClinicFlow API listening on ${env.PORT}`));

@@ -1,0 +1,1 @@
+-- Reserved for future schema changes; seed data is maintained by db/seeds/seed.js.
